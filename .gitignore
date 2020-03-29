@@ -1,11 +1,9 @@
-.DS_Store
 node_modules
-public/css
 config
+package-lock.json
+public/css
 dist
 cypress/fixtures
 cypress/plugins
 cypress/support
 cypress.json
-jest
-supertest

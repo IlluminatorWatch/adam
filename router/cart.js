@@ -1,14 +1,23 @@
 const express = require('express')
 const router = express.Router()
-const User = require("../models/newuser")
+const User = require("../models/user")
 const verifyToken = require("./verify")
 const Product = require("../models/product")
+const {checkAuthentication} = require('./auth')
 
-router.get("/cart", verifyToken, async (req, res) => {
+router.get("/cart", verifyToken, checkAuthentication, async (req, res) => {
 
     let products = []
 
-    const user = await User.findOne({
+    if (!req.body.user) {
+        req.flash(
+            'error_msg',
+            'Du måste vara inloggad'
+        )
+        return res.redirect("/products")
+    }
+
+    user = await User.findOne({
         _id: req.body.user._id
     })
     for (let i = 0; i < user.cart.length; i++) {
@@ -22,18 +31,33 @@ router.get("/cart", verifyToken, async (req, res) => {
     }
 
     res.render("shop/cart.ejs", {
-        products
+        products, user, admin:req.admin
     })
 })
 
 router.get("/cartAdd/:id", verifyToken, async (req, res) => {
 
-    const user = await User.findOne({
+    let user
+
+    if (!req.body.user) {
+        user = null
+
+        req.flash(
+            'error_msg',
+            'Du måste vara inloggad'
+          )
+
+        return res.redirect("/products")
+
+    }
+
+    user = await User.findOne({
         _id: req.body.user._id
     })
     await user.addToCart(req.params.id)
 
-    res.redirect("/cart")
+    req.flash("success_msg", "Varan är tillagd i varukorgen")
+    res.redirect("/productpage/" + req.params.id)
 
 })
 

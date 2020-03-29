@@ -1,10 +1,11 @@
 const express = require('express')
 const router = express.Router()
-const User = require("../models/newuser")
+const User = require("../models/user")
 const verifyToken = require("./verify")
 const Product = require("../models/product")
+const {checkAuthentication} = require('./auth')
 
-router.get("/checkout", verifyToken, async (req, res) => {
+router.get("/checkout", verifyToken, checkAuthentication, async (req, res) => {
 
     let products = []
 
@@ -20,9 +21,9 @@ router.get("/checkout", verifyToken, async (req, res) => {
         products.push(product)
 
     }
-
+    
     res.render("shop/checkout.ejs", {
-        products
+        products, user, admin:req.admin
     })
 })
 
